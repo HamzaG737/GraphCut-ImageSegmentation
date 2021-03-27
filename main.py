@@ -4,6 +4,7 @@ from GraphEmbedding import GraphEmbedding
 import argparse
 import cv2
 import matplotlib.pyplot as plt
+import os
 
 sigma = 30
 
@@ -20,8 +21,11 @@ def main(args):
 
     cut_edges = FordFulkerson(embeddings, source, sink)
     mask = compute_mask(cut_edges, graph.height, graph.width, source, sink)
-    plt.imsave("mask.jpg", mask, cmap="gray")
-    print("Saved image as", "ImgMask.jpg")
+    path, file_ = os.path.split(args.ImgPath)
+    filename, file_extension = os.path.splitext(file_)
+    save_dir = os.path.join(path, filename + "-mask" + file_extension)
+    plt.imsave(save_dir, mask, cmap="gray")
+    print("Saved image in ", save_dir)
 
 
 if __name__ == "__main__":
