@@ -38,7 +38,7 @@ def SmoothCost(l1, l2):
     
     
 def DataCost(label, DataP, x, y):
-	#Data cost term
+    #Data cost term
     return -np.log(DataP[y,x,label])
     
 
@@ -72,10 +72,10 @@ def alpha_beta_swap_new(alpha, beta, img_orig, img_labels, DataP):
     Applies alpha-beta move algorithm
 
     Args:
-	    alpha, beta: 2 labels to be swapped  
-	    img_orig: original grayscale image,  shape = (N x P)
-	    img_labels: initialized labeled image,   shape = (N x P)
-	    DataP: Probability distribution ,   shape = (N x P x n_labels) 
+        alpha, beta: 2 labels to be swapped  
+        img_orig: original grayscale image,  shape = (N x P)
+        img_labels: initialized labeled image,   shape = (N x P)
+        DataP: Probability distribution ,   shape = (N x P x n_labels) 
     """
 
     #extract position of alpha or beta pixels to mapping 
@@ -148,46 +148,38 @@ def swap_minimization(img, img_labels, DataP, n_cycles):
 
 def main(args): 
 
-	#load image
-	n_labels = args.n_labels
-	img_path =  args.ImgPath 
+    #load image
+    n_labels = args.n_labels
+    img_path =  args.ImgPath 
 
-	img_orig = Image.open(img_path).convert('L')
-	img_orig = img_orig.resize((500,334))
-	img_orig = np.asarray(img_orig)
+    img_orig = Image.open(img_path).convert('L')
+    img_orig = img_orig.resize((500,334))
+    img_orig = np.asarray(img_orig)
 
-	#get labels and reshaped to the image shape
-	labels = km_clust(img_orig, n_clusters=n_labels)
-	labels.shape = img_orig.shape
+    #get labels and reshaped to the image shape
+    labels = km_clust(img_orig, n_clusters=n_labels)
+    labels.shape = img_orig.shape
 
-	#define (interactively) bounds of regions defining the different objects
-	coords = [
-	          (100,250,50,100),
-	          (150,250,160,200),
-	          (200,250,260,300),
-	          (150,200,380,410),
-	          (0,50,0,200),
-	]
 
-	#associate labels to each region
-	coords_dic = {}
-	for coord in coords:
-	  l = getLabel(labels, coord)
-	  coords_dic[l] = coord
+    #associate labels to each region
+    coords_dic = {}
+    for coord in coords.COORDS:
+      l = getLabel(labels, coord)
+      coords_dic[l] = coord
 
-	#Create the data probability array
-	n,p = img_orig.shape
-	data_prob = np.zeros((n,p,n_labels))
+    #Create the data probability array
+    n,p = img_orig.shape
+    data_prob = np.zeros((n,p,n_labels))
 
-	for label in np.arange(n_labels):
-	  data_prob[:,:,label] = getProba(img_orig, coords_dic[label])
+    for label in np.arange(n_labels):
+      data_prob[:,:,label] = getProba(img_orig, coords_dic[label])
 
-	n_cycles = args.n_cycles
-	#Run the alpha beta swap minimization to get the segmented image
-	labeled_img = swap_minimization(img_orig, labels, data_prob, n_cycles) 
+    n_cycles = args.n_cycles
+    #Run the alpha beta swap minimization to get the segmented image
+    labeled_img = swap_minimization(img_orig, labels, data_prob, n_cycles) 
 
-	#save
-	plt.imsave('images/segmented.png', labeled_img)
+    #save
+    plt.imsave('images/segmented.png', labeled_img)
 
 if __name__ == "__main__":
 
