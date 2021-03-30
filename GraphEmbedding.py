@@ -22,6 +22,7 @@ class GraphEmbedding:
 
     def OpenImg(self, path):
         image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+        self.original_size = (image.shape[0], image.shape[1])
         image = cv2.resize(image, (self.resizing_factor, self.resizing_factor))
 
         return image

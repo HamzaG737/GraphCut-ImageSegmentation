@@ -21,10 +21,12 @@ def main(args):
 
     cut_edges = FordFulkerson(embeddings, source, sink)
     mask = compute_mask(cut_edges, graph.height, graph.width, source, sink)
+    mask_reshape = cv2.resize(mask, graph.original_size[::-1], 0, 0)
     path, file_ = os.path.split(args.ImgPath)
     filename, file_extension = os.path.splitext(file_)
     save_dir = os.path.join(path, filename + "-mask" + file_extension)
-    plt.imsave(save_dir, mask, cmap="gray")
+
+    plt.imsave(save_dir, mask_reshape, cmap="gray")
     print("Saved image in ", save_dir)
 
 
