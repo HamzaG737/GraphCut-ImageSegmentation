@@ -17,20 +17,20 @@ def km_clust(array, n_clusters):
     return labels
 
 def getLabel(labels, coord):
-  region = labels[coord[0]:coord[1], coord[2]:coord[3]]
-  values, counts = np.unique(region, return_counts=True)
-  return values[np.argmax(counts)]
+    region = labels[coord[0]:coord[1], coord[2]:coord[3]]
+    values, counts = np.unique(region, return_counts=True)
+    return values[np.argmax(counts)]
 
 def getProba(img, coord):
-  region = img[coord[0]:coord[1], coord[2]:coord[3]]
-  hist = cv2.calcHist( [region], [0], None, [256],  [0,256])
-  hist = hist / hist.sum()
-  regAlpha = 0.01
-  hist = regAlpha/hist.size + (1.0-regAlpha)*hist
-  hist = cv2.normalize(hist, hist, 0, 255, cv2.NORM_MINMAX)
+    region = img[coord[0]:coord[1], coord[2]:coord[3]]
+    hist = cv2.calcHist( [region], [0], None, [256],  [0,256])
+    hist = hist / hist.sum()
+    regAlpha = 0.01
+    hist = regAlpha/hist.size + (1.0-regAlpha)*hist
+    hist = cv2.normalize(hist, hist, 0, 255, cv2.NORM_MINMAX)
 
-  prob = cv2.calcBackProject([img], [0], hist, [0,256], 1.0)
-  prob = prob.astype(float)/255.
-  prob = prob + 1e-6
+    prob = cv2.calcBackProject([img], [0], hist, [0,256], 1.0)
+    prob = prob.astype(float)/255.
+    prob = prob + 1e-6
 
-  return prob
+    return prob
