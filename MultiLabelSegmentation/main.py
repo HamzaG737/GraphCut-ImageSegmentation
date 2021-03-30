@@ -11,7 +11,7 @@ from utils import *
 #utils
 
 
-def calculate_energy(img, DataP, img_labels):
+def calc_energy(img, DataP, img_labels):
     '''Calculates Energy of image.
        img: is input array'''
 
@@ -23,7 +23,7 @@ def calculate_energy(img, DataP, img_labels):
     E_smooth = 0
     for i in range(len(img)):
         for j in range(len(img[0])):
-            ns = give_neighbours(img_labels, j, i)
+            ns = get_neighbs(img_labels, j, i)
             E_smooth += sum([SmoothCost(v, img_labels[i][j]) for v in ns])
 
     return E_data + E_smooth
@@ -42,7 +42,7 @@ def DataCost(label, DataP, x, y):
     return -np.log(DataP[y,x,label])
     
 
-def give_neighbours(image, x, y):
+def get_neighbs(image, x, y):
     '''Returns a list of all neighbour intensities'''
     ns = []
     for a,b in zip([1,0,-1,0],[0,1,0,-1]):
@@ -51,7 +51,7 @@ def give_neighbours(image, x, y):
     return ns 
 
 
-def return_mapping_of_image(image, alpha, beta):
+def get_mapping(image, alpha, beta):
     mapping = {}
     revmap = {}
 
@@ -67,7 +67,7 @@ def return_mapping_of_image(image, alpha, beta):
     
     return mapping, revmap
 
-def alpha_beta_swap_new(alpha, beta, img_orig, img_labels, DataP):
+def alpha_beta_swap(alpha, beta, img_orig, img_labels, DataP):
     """ 
     Applies alpha-beta move algorithm
 
@@ -79,27 +79,27 @@ def alpha_beta_swap_new(alpha, beta, img_orig, img_labels, DataP):
     """
 
     #extract position of alpha or beta pixels to mapping 
-    map, revmap = return_mapping_of_image(img_labels, alpha, beta)
+    mapping, revmap = get_mapping(img_labels, alpha, beta)
     
     #graph of maxflow 
-    graph_mf = mf.Graph[float](len(map))
+    graph_mf = mf.Graph[float](len(mapping))
     #add nodes
-    nodes = graph_mf.add_nodes(len(map))
+    nodes = graph_mf.add_nodes(len(mapping))
             
     #add n-link edges
     weight = SmoothCost(alpha, beta)
-    for i in range(0,len(map)):
-        y,x = map[i]
+    for i in range(0,len(mapping)):
+        y,x = mapping[i]
         #top, left, bottom, right
         for a,b in zip([1,0,-1,0],[0,1,0,-1]):
             if (y+b, x+a) in revmap:
                 graph_mf.add_edge(i,revmap[(y+b,x+a)], weight, 0)
    
     #add all the terminal edges
-    for i in range(0,len(map)):
-        y,x = map[i]
+    for i in range(0,len(mapping)):
+        y,x = mapping[i]
         #find neighbours
-        neighbours = give_neighbours(img_labels, x, y)
+        neighbours = get_neighbs(img_labels, x, y)
         #consider only neighbours which are not having alpha or beta label
         fil_neigh = list(filter(lambda i: i!=alpha and i!=beta, neighbours))
         #calculation of weight
@@ -113,7 +113,7 @@ def alpha_beta_swap_new(alpha, beta, img_orig, img_labels, DataP):
     
     #depending on cut assign new label
     for i in range(0, len(res)):
-        y, x = map[i] 
+        y, x = mapping[i] 
         if res[i] == 1:
             img_labels[y][x] = alpha 
         else:
@@ -124,7 +124,7 @@ def alpha_beta_swap_new(alpha, beta, img_orig, img_labels, DataP):
 
 def swap_minimization(img, img_labels, DataP, n_cycles):
 
-    best_energy = calculate_energy(img, DataP, img_labels)
+    best_energy = calc_energy(img, DataP, img_labels)
     print("initial energy ", best_energy)
     labels = np.unique(img_labels)
     #do iteration of all pairs a few times
@@ -135,8 +135,8 @@ def swap_minimization(img, img_labels, DataP, n_cycles):
             for j in range(i+1, len(labels)):
 
                 #computing intensive swapping and graph cutting part
-                aux  = alpha_beta_swap_new(labels[i],labels[j], img, img_labels, DataP) 
-                new_energy = calculate_energy(img, DataP, aux)
+                aux  = alpha_beta_swap(labels[i],labels[j], img, img_labels, DataP) 
+                new_energy = calc_energy(img, DataP, aux)
                 #print('new energy ', new_energy)
                 if  new_energy < best_energy:
                     img_labels = aux  
@@ -153,7 +153,6 @@ def main(args):
     img_path =  args.ImgPath 
 
     img_orig = Image.open(img_path).convert('L')
-    img_orig = img_orig.resize((500,334))
     img_orig = np.asarray(img_orig)
 
     #get labels and reshaped to the image shape
