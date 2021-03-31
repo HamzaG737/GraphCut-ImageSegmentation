@@ -1,3 +1,5 @@
-matplotlib==3.3.4
 numpy==1.19.5
+matplotlib==3.3.4
+maxflow==0.0.1
+Pillow==8.1.2
 scikit_learn==0.24.1

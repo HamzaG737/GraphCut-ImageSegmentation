@@ -1,4 +1,4 @@
-from Algos import FordFulkerson, pushRelabel
+from Algos import FordFulkerson
 from utils import compute_mask, get_clusters
 from GraphEmbedding import GraphEmbedding
 import argparse
@@ -19,7 +19,7 @@ def main(args):
     source = len(embeddings) - 2
     sink = len(embeddings) - 1
 
-    cut_edges = pushRelabel(embeddings, source, sink)
+    cut_edges = FordFulkerson(embeddings, source, sink)
     mask = compute_mask(cut_edges, graph.height, graph.width, source, sink)
     mask_reshape = cv2.resize(mask, graph.original_size[::-1], 0, 0)
     path, file_ = os.path.split(args.ImgPath)
